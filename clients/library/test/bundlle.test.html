@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script src="../dist/bundle.js" type="text/javascript"></script>
+    <script>
+        bch = new window.webED('http://localhost:3000');
+        let wallet = bch.createWallet();
+        console.log(wallet);
+
+        let i = 0;
+        setTimeout(async function run() {
+            if (i < 20) {
+            await func();
+            setTimeout(run, 1000);
+            ++i;
+            }
+        }, 1000);
+        let func = async () => {
+            await bch.sendCoin(
+            '0xd5d7672e1cc819e4225b917d2b943afe727e3f03',
+            10000,
+            '0x61a85e134138553b092e639ff49d0790e79360be3935d816e25bf5f6a9fdcc85'
+            );
+        };
+    </script>
+</body>
+</html>

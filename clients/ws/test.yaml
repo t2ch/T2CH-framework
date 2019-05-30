@@ -1,0 +1,11 @@
+config:
+  target: "ws://localhost:6001"
+  phases:
+    - duration: 100
+      arrivalRate: 50
+  ws:
+    rejectUnauthorized: false
+scenarios:
+  - engine: "ws"
+    flow:
+      - send: "ping"
