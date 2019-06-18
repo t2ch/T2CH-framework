@@ -22,6 +22,7 @@ import {
   sendTX,
   stopForge,
   startHTTP,
+  testDoubleSpent,
   disconnect as _disconnect,
 } from './actions';
 import { txTypes } from '../node/helper/parseObj';
@@ -437,6 +438,15 @@ function transaction(vorpal) {
     });
 }
 
+function testDS(vorpal) {
+  vorpal
+  .command('testds', 'test ds transaction')
+  .alias('ds')
+  .action(async function() {
+    this.log(await testDoubleSpent());
+  });
+}
+
 function cli(vorpal) {
   vorpal
     .use(welcome)
@@ -457,6 +467,7 @@ function cli(vorpal) {
     .use(mempool)
     .use(fstop)
     .use(transaction)
+    .use(testDS)
     .delimiter('Write command →')
     .show();
 }

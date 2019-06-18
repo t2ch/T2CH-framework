@@ -70,6 +70,38 @@ class Coin extends Transaction {
   }
 
   /**
+   * Проверка на двойную трату внутри одного блока, при его формировании
+   * 
+   * @param {Coin[]} otherTxs 
+   * @returns {boolean}
+   */
+  //TODO: оптимизировать через поиск ключ-значениие
+  canBeInOneBlock(otherTxs) {
+    for (let i=0; i<otherTxs.length; i++){
+      let flag = false;
+
+      if (otherTxs[i].hash != this.hash) {
+        let result = [];
+        for( let k=0; k<otherTxs[i].data.inputs.length; k++) {
+          for( let s=0; s<this.data.inputs.length; s++) {
+            if (otherTxs[i].data.inputs[k].txHash == this.data.inputs[s].txHash &&
+              otherTxs[i].data.inputs[k].index == this.data.inputs[s].index) {
+
+                result.push(otherTxs[i].data.inputs[k]);
+            }
+          }
+        }
+        if (result.length > 0)
+          flag = true;
+      }
+      if (flag)
+        return false;
+    };
+
+    return true;
+  }
+
+  /**
    * Проверка валидности транзакции
    * @async
    */
