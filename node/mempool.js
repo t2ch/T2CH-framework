@@ -70,19 +70,13 @@ class Mempool {
       BLOCK_SIZE,
     );
 
-    console.log('ДО ОБРАБОТКИ '+JSON.stringify(toForge))
-
     for (let i=0; i<toForge.length; i++) {
-      console.log('СОБРАЛ: '+toForge[i]);
       if (!toForge[i].canBeInOneBlock(toForge)){
-        console.log('НЕ СОБРАЛ: '+toForge[i]);
         Mempool.removeTransaction(toForge[i].hash)
         toForge.splice(i,1);
         --i;
       }
     }
-
-    console.log('ИТОГО '+JSON.stringify(toForge))
 
     return toForge;
   }
