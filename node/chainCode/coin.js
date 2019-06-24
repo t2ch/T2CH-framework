@@ -3,6 +3,7 @@ import { isValidAddress } from '../wallet/wallet';
 import DB from '../db/index';
 
 const unspInpDB = DB.getInstance('unspInp');
+const txName = 'coin';
 
 /**
  * Транзакции типа "coin"
@@ -24,7 +25,7 @@ class Coin extends Transaction {
     const { inputs, outputs } = this.data;
 
     inputs.forEach((input) => {
-      const key = `${this.from}_${input.txHash}_${input.index}`;
+      const key = `${txName}_${this.from}_${input.txHash}_${input.index}`;
       unspInpDB.del(key);
     });
 
@@ -35,7 +36,7 @@ class Coin extends Transaction {
         index,
         amount: output.amount,
       };
-      const key = `${output.address}_${this.hash}_${index}`;
+      const key = `${txName}_${output.address}_${this.hash}_${index}`;
       unspInpDB.put(key, unspInp);
     });
   }
@@ -49,7 +50,7 @@ class Coin extends Transaction {
     const checks = [];
     const { inputs } = this.data;
     inputs.forEach((input) => {
-      const key = `${this.from}_${input.txHash}_${input.index}`;
+      const key = `${txName}_${this.from}_${input.txHash}_${input.index}`;
       checks.push(unspInpDB.get(key)); // проверяем, не использован ли input
     });
 
@@ -71,32 +72,28 @@ class Coin extends Transaction {
 
   /**
    * Проверка на двойную трату внутри одного блока, при его формировании
-   * 
-   * @param {Coin[]} otherTxs 
+   *
+   * @param {Coin[]} otherTxs
    * @returns {boolean}
    */
-  //TODO: оптимизировать через поиск ключ-значениие
+  // TODO: оптимизировать через поиск ключ-значениие
   canBeInOneBlock(otherTxs) {
-    for (let i=0; i<otherTxs.length; i++){
+    for (let i = 0; i < otherTxs.length; i += 1) {
       let flag = false;
-
-      if (otherTxs[i].hash != this.hash) {
-        let result = [];
-        for( let k=0; k<otherTxs[i].data.inputs.length; k++) {
-          for( let s=0; s<this.data.inputs.length; s++) {
-            if (otherTxs[i].data.inputs[k].txHash == this.data.inputs[s].txHash &&
-              otherTxs[i].data.inputs[k].index == this.data.inputs[s].index) {
-
-                result.push(otherTxs[i].data.inputs[k]);
+      if (otherTxs[i].hash !== this.hash) {
+        const result = [];
+        for (let k = 0; k < otherTxs[i].data.inputs.length; k += 1) {
+          for (let s = 0; s < this.data.inputs.length; s += 1) {
+            if (otherTxs[i].data.inputs[k].txHash === this.data.inputs[s].txHash
+              && otherTxs[i].data.inputs[k].index === this.data.inputs[s].index) {
+              result.push(otherTxs[i].data.inputs[k]);
             }
           }
         }
-        if (result.length > 0)
-          flag = true;
+        if (result.length > 0) { flag = true; }
       }
-      if (flag)
-        return false;
-    };
+      if (flag) { return false; }
+    }
 
     return true;
   }
@@ -189,7 +186,7 @@ class Coin extends Transaction {
    * @returns {Promise<Object>}
    */
   static getUnspentInputs(address) {
-    const prefix = `${address}_`;
+    const prefix = `${txName}_${address}_`;
     const unspInputs = [];
     return new Promise((resolve) => {
       unspInpDB.createReadStream({

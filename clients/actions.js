@@ -14,6 +14,7 @@ import { txTypes } from '../node/helper/parseObj';
 import Forging from '../node/forging';
 import Peer from '../node/p2p/Peer';
 import start from './rpc/server';
+import Moderator from '../node/chainCode/moderator';
 
 
 const status = new Status();
@@ -121,6 +122,16 @@ export function getStatus() {
   return `Current status: ${status.state}`;
 }
 
+export async function getModers() {
+  let list = '';
+  const mass = await Moderator.getAllModerators();
+
+  mass.forEach((item, index) => {
+    list += `${item}${index !== (mass.length - 1) ? '\n' : ''}`;
+  });
+  return list;
+}
+
 export async function sendTX(type, params) {
   const { address, privateKey, publicKey } = User.getSelectedWallet();
 
@@ -128,7 +139,7 @@ export async function sendTX(type, params) {
     const tx = await txTypes[type].genTX(address, publicKey, params);
     await tx.signTX(privateKey.substring(2));
 
-    Mempool.checkTransaction(tx, true);
+    await Mempool.checkTransaction(tx, false);
     Mempool.addTransaction(tx);
 
     Peer.sendTX(tx);
@@ -194,20 +205,20 @@ export async function testDoubleSpent() {
   const { address, privateKey, publicKey } = User.getSelectedWallet();
 
   try {
-    const tx = await txTypes['coin'].genTX(address, publicKey, {
-        type: 'coin', 
-        recipient: '0x42117b13c36550fe27bf6790466906a2f16d8ef8', 
-        amount: 100
-      });
+    const tx = await txTypes.coin.genTX(address, publicKey, {
+      type: 'coin',
+      recipient: '0x42117b13c36550fe27bf6790466906a2f16d8ef8',
+      amount: 100,
+    });
     await tx.signTX(privateKey.substring(2));
 
     let tx2 = new Transaction();
-    tx2 = await txTypes['coin'].genTX(address, publicKey, {
-      type: 'coin', 
-      recipient: '0x42117b13c36550fe27bf6790466906a2f16d8ef8', 
-      amount: 222
+    tx2 = await txTypes.coin.genTX(address, publicKey, {
+      type: 'coin',
+      recipient: '0x42117b13c36550fe27bf6790466906a2f16d8ef8',
+      amount: 222,
     });
-      tx2.data.inputs[0] = {"txHash":"c8b4602f69d6357696f644de7c32581b95ebd6f7231e2907da8c803b530d5913","index":0,"amount":250000000000};
+    tx2.data.inputs[0] = { txHash: 'c8b4602f69d6357696f644de7c32581b95ebd6f7231e2907da8c803b530d5913', index: 0, amount: 250000000000 };
     await tx2.signTX(privateKey.substring(2));
 
     Mempool.checkTransaction(tx);

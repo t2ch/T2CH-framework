@@ -16,6 +16,7 @@ import {
   getBalance,
   getStatus,
   getMempool,
+  getModers,
   clearMempool,
   getTransactions,
   selectWallet,
@@ -266,8 +267,56 @@ function sendTx(vorpal) {
           type: answer.txtype,
         };
 
-        const enterData = new Promise((resolves) => {
+        const enterData = new Promise(async (resolves) => {
           switch (params.type) {
+            case 'moder':
+              const actionData = new Promise((resolves2) => {
+                self.prompt({
+                  type: 'list',
+                  name: 'action',
+                  choices: ['vote', 'add', 'remove'],
+                  message: 'Select type of action',
+                }, async (answer) => {
+                  params.action = answer.action;
+                  resolves2();
+                });
+              });
+
+              await actionData;
+              if (params.action === 'vote') {
+                self.prompt(
+                  [
+                    {
+                      type: 'input',
+                      name: 'refHash',
+                      message: 'Enter hash of the vote transaction: ',
+                      // validate: input => isValidHash(input),
+                    },
+                  ], async (answers) => {
+                    params.refHash = answers.refHash;
+
+                    resolves();
+                  }
+);
+              } else if (params.action == 'add' || params.action == 'remove') {
+                self.prompt(
+                  [
+                    {
+                      type: 'input',
+                      name: 'address',
+                      message: `Enter address of the ${params.action == 'add' ? 'new ':'removing '} moderator: `,
+                      validate: input => isValidAddress(input),
+                    },
+                  ], async (answers) => {
+                    params.address = answers.address;
+
+                    resolves();
+                  }
+);
+              }
+
+              break;
+            case 'prognoz': break;
             case 'coin':
               self.prompt(
                 [
@@ -334,6 +383,15 @@ function ban(vorpal) {
     .command('ban <ip>', 'block incoming messages from single ip')
     .action((args, callback) => {
       banIP(args.ip);
+      callback();
+    });
+}
+
+async function moders(vorpal) {
+  vorpal
+    .command('moders', 'geting list of actual moderators')
+    .action(async (args, callback) => {
+      this.log(await getModers());
       callback();
     });
 }
@@ -440,11 +498,11 @@ function transaction(vorpal) {
 
 function testDS(vorpal) {
   vorpal
-  .command('testds', 'test ds transaction')
-  .alias('ds')
-  .action(async function() {
-    this.log(await testDoubleSpent());
-  });
+    .command('testds', 'test ds transaction')
+    .alias('ds')
+    .action(async function () {
+      this.log(await testDoubleSpent());
+    });
 }
 
 function cli(vorpal) {
@@ -468,6 +526,7 @@ function cli(vorpal) {
     .use(fstop)
     .use(transaction)
     .use(testDS)
+    .use(moders)
     .delimiter('Write command →')
     .show();
 }

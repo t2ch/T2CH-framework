@@ -65,24 +65,18 @@ class Mempool {
   static getTransactionsForBlock() {
     const txsArray = Mempool.getTransactions();
 
-    let toForge = txsArray.splice(
+    const toForge = txsArray.splice(
       0,
       BLOCK_SIZE,
     );
 
-    console.log('ДО ОБРАБОТКИ '+JSON.stringify(toForge))
-
-    for (let i=0; i<toForge.length; i++) {
-      console.log('СОБРАЛ: '+toForge[i]);
-      if (!toForge[i].canBeInOneBlock(toForge)){
-        console.log('НЕ СОБРАЛ: '+toForge[i]);
-        Mempool.removeTransaction(toForge[i].hash)
-        toForge.splice(i,1);
-        --i;
+    for (let i = 0; i < toForge.length; i += 1) {
+      if (!toForge[i].canBeInOneBlock(toForge)) {
+        Mempool.removeTransaction(toForge[i].hash);
+        toForge.splice(i, 1);
+        i -= 1;
       }
     }
-
-    console.log('ИТОГО '+JSON.stringify(toForge))
 
     return toForge;
   }

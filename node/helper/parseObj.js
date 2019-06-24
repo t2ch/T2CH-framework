@@ -1,5 +1,7 @@
 
 import Coin from '../chainCode/coin';
+import Moderator from '../chainCode/moderator';
+import Prognoz from '../chainCode/prognoz';
 
 /**
  * Список поддерживаемых типов траназкций
@@ -8,6 +10,8 @@ import Coin from '../chainCode/coin';
  */
 export const txTypes = {
   coin: Coin,
+  moder: Moderator,
+  prognoz: Prognoz,
 };
 
 /**
