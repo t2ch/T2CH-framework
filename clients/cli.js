@@ -17,6 +17,8 @@ import {
   getStatus,
   getMempool,
   getModers,
+  isCompliance,
+  getAllComplience,
   clearMempool,
   getTransactions,
   selectWallet,
@@ -268,16 +270,17 @@ function sendTx(vorpal) {
         };
 
         const enterData = new Promise(async (resolves) => {
+          let actionData;
           switch (params.type) {
             case 'moder':
-              const actionData = new Promise((resolves2) => {
+              actionData = new Promise((resolves2) => {
                 self.prompt({
                   type: 'list',
                   name: 'action',
-                  choices: ['vote', 'add', 'remove'],
+                  choices: ['vote', 'add', 'remove', 'compliance'],
                   message: 'Select type of action',
-                }, async (answer) => {
-                  params.action = answer.action;
+                }, async (answers) => {
+                  params.action = answers.action;
                   resolves2();
                 });
               });
@@ -294,27 +297,45 @@ function sendTx(vorpal) {
                     },
                   ], async (answers) => {
                     params.refHash = answers.refHash;
-
                     resolves();
-                  }
-);
-              } else if (params.action == 'add' || params.action == 'remove') {
+                  },
+                );
+              } else if (params.action === 'compliance') {
                 self.prompt(
                   [
                     {
                       type: 'input',
                       name: 'address',
-                      message: `Enter address of the ${params.action == 'add' ? 'new ':'removing '} moderator: `,
+                      message: 'Enter address of new user: ',
+                      validate: input => isValidAddress(input),
+                    },
+                    {
+                      type: 'input',
+                      name: 'login',
+                      message: 'Enter login of new user: ',
+                    },
+                  ], async (answers) => {
+                    params.address = answers.address;
+                    params.login = answers.login;
+                    resolves();
+                  },
+                );
+              } else if (params.action === 'add' || params.action === 'remove') {
+                self.prompt(
+                  [
+                    {
+                      type: 'input',
+                      name: 'address',
+                      message: `Enter address of the ${params.action === 'add' ? 'new ' : 'removing '} moderator: `,
                       validate: input => isValidAddress(input),
                     },
                   ], async (answers) => {
                     params.address = answers.address;
 
                     resolves();
-                  }
-);
+                  },
+                );
               }
-
               break;
             case 'prognoz': break;
             case 'coin':
@@ -339,11 +360,9 @@ function sendTx(vorpal) {
                   resolves();
                 },
               );
-
               break;
             default:
               resolves();
-
               break;
           }
         });
@@ -383,6 +402,23 @@ function ban(vorpal) {
     .command('ban <ip>', 'block incoming messages from single ip')
     .action((args, callback) => {
       banIP(args.ip);
+      callback();
+    });
+}
+
+async function compliance(vorpal) {
+  vorpal
+    .command('compliance', 'geting verifed users')
+    .option('-c, --check <userAddress>', 'is verifed user?')
+    .option('-a, --all', 'all verifed users')
+    .types({ string: ['_'] })
+    .action(async (args, callback) => {
+      if (args.options.all) {
+        this.log(await getAllComplience(args.options.all));
+      }
+      if (args.options.check) {
+        this.log(await isCompliance(args.options.check));
+      }
       callback();
     });
 }
@@ -527,6 +563,7 @@ function cli(vorpal) {
     .use(transaction)
     .use(testDS)
     .use(moders)
+    .use(compliance)
     .delimiter('Write command →')
     .show();
 }

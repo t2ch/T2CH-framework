@@ -76,7 +76,7 @@ class Moderator extends Transaction {
     } catch (e) {
       if (e.message === msg) {
         throw new Error(msg);
-      } else console.log(e);
+      }
     }
   }
 
@@ -222,7 +222,6 @@ class Moderator extends Transaction {
     await (new Promise((resolve) => {
       unspInpDB.createReadStream({})
         .on('data', (data) => {
-          console.log(data);
           const len = tryToAdd.length >= tryToRemove.length ? tryToAdd.length : tryToRemove.length;
           for (let i = 0; i < len; i += 1) {
             if (i < tryToRemove.length) {
@@ -258,6 +257,44 @@ class Moderator extends Transaction {
     return moderList;
   }
 
+  static async isComplience(address) {
+    return new Promise((resolve) => {
+      txsDB.createReadStream({})
+        .on('data', (data) => {
+          if (data.value.data.type === txName) {
+            if (data.value.data.action === 'compliance') {
+              if (data.value.data.address === address) {
+                resolve(data.value.data.login);
+              }
+            }
+          }
+        })
+        .on('end', () => {
+          resolve(null);
+        });
+    });
+  }
+
+  static async getAllComplience() {
+    const verifedUsers = [];
+    return new Promise((resolve) => {
+      txsDB.createReadStream({})
+        .on('data', (data) => {
+          if (data.value.data.type === txName) {
+            if (data.value.data.action === 'compliance') {
+              verifedUsers.push({
+                address: data.value.data.address,
+                login: data.value.data.login,
+              });
+            }
+          }
+        })
+        .on('end', () => {
+          resolve(verifedUsers);
+        });
+    });
+  }
+
   static async genTX(from, publicKey, params) {
     const data = {};
     data.type = params.type;
@@ -274,6 +311,10 @@ class Moderator extends Transaction {
         break;
       case 'vote':
         data.input = params.refHash;
+        break;
+      case 'compliance':
+        data.address = params.address;
+        data.login = params.login;
         break;
       default:
         throw new Error('Некорретный экшн');

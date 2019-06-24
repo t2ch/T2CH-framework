@@ -122,6 +122,21 @@ export function getStatus() {
   return `Current status: ${status.state}`;
 }
 
+export async function isCompliance(address) {
+  const result = await Moderator.isComplience(address);
+  return (result === null ? 'No' : `Yes, his login: ${result}`);
+}
+
+export async function getAllComplience(address) {
+  const users = await Moderator.getAllComplience(address);
+  let result = '';
+  users.forEach((user) => {
+    result += `${user.address} ${user.login}\n`;
+  });
+
+  return result;
+}
+
 export async function getModers() {
   let list = '';
   const mass = await Moderator.getAllModerators();
