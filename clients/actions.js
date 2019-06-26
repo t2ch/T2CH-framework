@@ -3,7 +3,7 @@ import Transaction from '../node/transaction';
 import Coin from '../node/chainCode/coin';
 import P2P from '../node/p2p/p2p';
 import {
-  privateToAddress, getPublicFromPrivate, publicToAddress,
+  privateToAddress, getPublicFromPrivate, publicToAddress, generate,
 } from '../node/wallet/wallet';
 import Block from '../node/block';
 import Mempool from '../node/mempool';
@@ -11,9 +11,11 @@ import Status from '../node/status';
 import PeerList from '../node/p2p/PeerList';
 import { initConnection } from '../config';
 import { txTypes } from '../node/helper/parseObj';
+import genRandomString from '../node/helper/hash';
 import Forging from '../node/forging';
 import Peer from '../node/p2p/Peer';
 import start from './rpc/server';
+import Prognoz from '../node/chainCode/prognoz';
 import Moderator from '../node/chainCode/moderator';
 
 
@@ -135,6 +137,43 @@ export async function getAllComplience(address) {
   });
 
   return result;
+}
+
+export function decryptTip(hash) {
+  return Prognoz.decryptTip(hash);
+}
+
+export async function getAllPublicTips(time) {
+  const tips = await Prognoz.getAllPublic(time);
+  return tips;
+}
+
+export async function getAllPrivateTipsWithoutOpen(time) {
+  const tips = await Prognoz.getAllPrivateWithoutOpen(time);
+  return tips;
+}
+
+export async function getAllTipsByUser(address) {
+  const tips = await Prognoz.getAllByUser(address);
+  return tips;
+}
+
+export async function getOpenByPrivate(hash) {
+  const tips = await Prognoz.getOpenByPrivate(hash);
+  return tips;
+}
+
+export async function sendTip(type, _params) {
+  const params = _params;
+  if (params.action === 'private') {
+    params.salt = _params.salt || genRandomString(64);
+    console.log('Созданная соль: ' + params.salt);
+    const keys = generate();
+    console.log('Созданный pk: ' + keys.PrivateKey);
+    params.privKey = keys.PrivateKey;
+  }
+
+  await exports.sendTX(type, params);
 }
 
 export async function getModers() {

@@ -1,4 +1,5 @@
 /* eslint-disable func-names */
+import { resolve } from 'path';
 import {
   startP2P,
   connectToAll,
@@ -19,6 +20,12 @@ import {
   getModers,
   isCompliance,
   getAllComplience,
+  sendTip,
+  getAllTipsByUser,
+  getAllPrivateTipsWithoutOpen,
+  getAllPublicTips,
+  getOpenByPrivate,
+  decryptTip,
   clearMempool,
   getTransactions,
   selectWallet,
@@ -34,7 +41,7 @@ import User from '../node/wallet/user';
 
 // COMMANDS
 async function welcome(vorpal) {
-  vorpal.log('Welcome to Evodesk blockchain node!');
+  vorpal.log('Welcome to T2CH blockchain node!');
 
   try {
     await getWallets();
@@ -249,6 +256,198 @@ function search(vorpal) {
       } else this.log('Please, input data.');
 
       callback();
+    });
+}
+
+function prognoz(vorpal) {
+  vorpal
+    .command('prognoz', 'Sending prognoz transaction')
+    .alias('pr')
+    .types({ string: ['_'] })
+    .action(function (args, callback) {
+      const self = this;
+      this.prompt({
+        type: 'list',
+        name: 'queryType',
+        choices: [
+          'Create public',
+          'Craete private',
+          'Create open',
+          'Decript opened tips',
+          'Get all by User',
+          'Get all public tips',
+          'Get all private, without opened tips',
+          'Find open by private',
+        ],
+        message: 'Select type of transaction',
+      }, async (answer) => {
+        const params = {
+          type: 'prognoz',
+          action: answer.queryType,
+        };
+
+        const enetringData = (new Promise(async (resolves) => {
+          switch (params.action) {
+            case 'Create public':
+              self.prompt(
+                [
+                  {
+                    type: 'input',
+                    name: 'matchDate',
+                    message: 'Enter date of match: ',
+                  },
+                  {
+                    type: 'input',
+                    name: 'game',
+                    message: 'Enter comands in one line: ',
+                  },
+                  {
+                    type: 'input',
+                    name: 'gameType',
+                    message: 'Enter type of sport: ',
+                  },
+                  {
+                    type: 'input',
+                    name: 'tip',
+                    message: 'Enter prediction type: ',
+                  },
+                ], async (answers) => {
+                  params.action = 'public';
+                  params.matchDate = answers.matchDate;
+                  params.game = answers.game;
+                  params.gameType = answers.gameType;
+                  params.tip = answers.tip;
+                  await sendTX(params.type, params);
+                  resolves();
+                },
+              );
+              break;
+            case 'Craete private':
+              self.prompt(
+                [
+                  {
+                    type: 'input',
+                    name: 'matchDate',
+                    message: 'Enter date of match: ',
+                  },
+                  {
+                    type: 'input',
+                    name: 'game',
+                    message: 'Enter comands in one line: ',
+                  },
+                  {
+                    type: 'input',
+                    name: 'gameType',
+                    message: 'Enter type of sport: ',
+                  },
+                  {
+                    type: 'input',
+                    name: 'tip',
+                    message: 'Enter prediction type: ',
+                  },
+                ], async (answers) => {
+                  params.action = 'private';
+                  params.matchDate = answers.matchDate;
+                  params.game = answers.game;
+                  params.gameType = answers.gameType;
+                  params.tip = answers.tip;
+                  await sendTip(params.type, params);
+                  resolves();
+                },
+              );
+              break;
+            case 'Create open':
+              self.prompt(
+                [
+                  {
+                    type: 'input',
+                    name: 'href',
+                    message: 'Enter link to private tip: ',
+                  },
+                  {
+                    type: 'input',
+                    name: 'privKey',
+                    message: 'Enter privateKey to opened tip: ',
+                  },
+                  {
+                    type: 'input',
+                    name: 'salt',
+                    message: 'Enter salt to opened tip: ',
+                  },
+                ], async (answers) => {
+                  params.action = 'open';
+                  params.href = answers.href;
+                  params.salt = answers.salt;
+                  params.privKey = answers.privKey;
+                  await sendTX(params.type, params);
+                  resolves();
+                },
+              );
+              break;
+            case 'Get all public tips':
+              this.log(await getAllPublicTips());
+              resolves();
+              break;
+            case 'Decript opened tips':
+              self.prompt(
+                [
+                  {
+                    type: 'input',
+                    name: 'href',
+                    message: 'Enter link to opened tip: ',
+                  },
+                ],
+                async (answers) => {
+                  this.log(await decryptTip(answers.href));
+                  resolves();
+                },
+              );
+              break;
+            case 'Get all by User':
+              self.prompt(
+                [
+                  {
+                    type: 'input',
+                    name: 'address',
+                    message: 'Enter address: ',
+                    validate: input => isValidAddress(input),
+                  },
+                ],
+                async (answers) => {
+                  this.log(await getAllTipsByUser(answers.address));
+                  resolves();
+                },
+              );
+              break;
+            case 'Get all private, without opened tips':
+              this.log(await getAllPrivateTipsWithoutOpen());
+              resolves();
+              break;
+            case 'Find open by private':
+              self.prompt(
+                [
+                  {
+                    type: 'input',
+                    name: 'hash',
+                    message: 'Enter hash of private: ',
+                  },
+                ],
+                async (answers) => {
+                  this.log(await getOpenByPrivate(answers.hash));
+                  resolves();
+                },
+              );
+
+              break;
+            default:
+              resolves();
+              break;
+          }
+        }));
+
+        await enetringData;
+        return callback();
+      });
     });
 }
 
@@ -563,6 +762,7 @@ function cli(vorpal) {
     .use(transaction)
     .use(testDS)
     .use(moders)
+    .use(prognoz)
     .use(compliance)
     .delimiter('Write command →')
     .show();

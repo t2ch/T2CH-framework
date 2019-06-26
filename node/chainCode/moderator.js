@@ -1,6 +1,5 @@
 import Transaction from '../transaction';
 import Block from '../block';
-// import { isValidAddress } from '../wallet/wallet';
 import DB from '../db/index';
 
 const unspInpDB = DB.getInstance('unspInp');
@@ -8,7 +7,7 @@ const txsDB = DB.getInstance('txs');
 const txName = 'moder';
 
 /**
- * Транзакции типа "coin"
+ * Транзакции типа "moderator"
  * @class
  */
 class Moderator extends Transaction {
@@ -37,6 +36,7 @@ class Moderator extends Transaction {
    */
   async checkTX() {
     await super.checkTX();
+    // TODO: checkFields
     await Moderator.isModerator(this.from);
     if (this.data.action === 'vote') {
       await this.hasInVoteList();

@@ -100,7 +100,7 @@ function App(props) {
           </IconButton>
           <Hidden implementation="css" smDown>
             <Typography variant="h6" color="inherit">
-              Atum Block Explorer
+              Smart-tips Block Explorer
             </Typography>
           </Hidden>
           <div className={classes.grow} />
