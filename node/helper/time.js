@@ -9,9 +9,11 @@ export default function getTimeInSec() {
 }
 
 export function calctimeFrame(time) {
-  // TODO: придумать как определить конец дня
+  const dateNow = Date.parse(time);
+  const start = dateNow.setHours(0, 0, 0, 0);
+  const end = dateNow.setHours(23, 59, 59, 999);
   return {
-    start: 1,
-    end: 2,
+    start,
+    end,
   };
 }
