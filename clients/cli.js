@@ -317,7 +317,11 @@ function prognoz(vorpal) {
                   params.game = answers.game;
                   params.gameType = answers.gameType;
                   params.tip = answers.tip;
-                  await sendTX(params.type, params);
+                  try {
+                    await sendTX(params.type, params);
+                  } catch (e) {
+                    console.log('Некорректная транзакция: '+e.message);
+                  }
                   resolves();
                 },
               );
@@ -351,7 +355,11 @@ function prognoz(vorpal) {
                   params.game = answers.game;
                   params.gameType = answers.gameType;
                   params.tip = answers.tip;
-                  await sendTip(params.type, params);
+                  try {
+                    await sendTip(params.type, params);
+                  } catch (e) {
+                    console.log('Некорректная транзакция: '+e.message);
+                  }
                   resolves();
                 },
               );
@@ -379,7 +387,11 @@ function prognoz(vorpal) {
                   params.href = answers.href;
                   params.salt = answers.salt;
                   params.privKey = answers.privKey;
-                  await sendTX(params.type, params);
+                  try {
+                    await sendTX(params.type, params);
+                  } catch (e) {
+                    console.log('Некорректная транзакция: '+e.message);
+                  }
                   resolves();
                 },
               );

@@ -6,7 +6,7 @@ import { getPublicFromPrivate } from '../wallet/wallet';
 import { calctimeFrame } from '../helper/time';
 
 const txsDB = DB.getInstance('txs');
-const txName = 'compl';
+const txName = 'prognoz';
 
 /**
  * Транзакции типа "prognoz"
@@ -25,14 +25,14 @@ class Prognoz extends Transaction {
     await super.checkTX();
     switch (this.data.action) {
       case 'public':
-        if (await Moderator.isComplience() !== null) {
+        if (await Moderator.isComplience(this.from) === null) {
           throw new Error('Нет прав на публикацию');
         }
         await this.inLimit();
         // TODO: checkFields
         break;
       case 'private':
-        if (await Moderator.isComplience() !== null) {
+        if (await Moderator.isComplience(this.from) === null) {
           throw new Error('Нет прав на публикацию');
         }
         await this.inLimit();
@@ -50,17 +50,23 @@ class Prognoz extends Transaction {
   async inLimit() {
     const timeFrame = calctimeFrame(this.timestamp);
     let i = 0;
-    txsDB.createReadStream({})
-      .on('data', (data) => {
-        if (data.value.type === txName) {
-          if ((data.value.data.action === 'private' || data.value.data.action === 'public')
-            && data.value.from === this.from) {
-            if (data.value.timestamp <= timeFrame.end && data.value.timestamp >= timeFrame.start) {
-              i += 1;
+    i = await (new Promise((resolve) => {
+      txsDB.createReadStream({})
+        .on('data', (data) => {
+          if (data.value.data.type === txName) {
+            if ((data.value.data.action === 'private' || data.value.data.action === 'public')
+              && data.value.from === this.from) {
+              if (data.value.timestamp <= timeFrame.end
+                 && data.value.timestamp >= timeFrame.start) {
+                i += 1;
+              }
             }
           }
-        }
-      });
+        })
+        .on('end', () => {
+          resolve(i);
+        });
+    }));
 
     if (i >= 10) {
       throw new Error('Превыше суточный лимит');
@@ -80,7 +86,7 @@ class Prognoz extends Transaction {
     return new Promise((resolve) => {
       txsDB.createReadStream({})
         .on('data', (data) => {
-          if (data.value.type === txName) {
+          if (data.value.data.type === txName) {
             if (data.value.data.matchDate > time && data.value.data.action === 'public') {
               publicTips.push(data.value);
             }
@@ -99,7 +105,7 @@ class Prognoz extends Transaction {
     privateTips = await (new Promise((resolve) => {
       txsDB.createReadStream({})
         .on('data', (data) => {
-          if (data.value.type === txName) {
+          if (data.value.data.type === txName) {
             if (data.value.data.matchDate > time && data.value.data.action === 'private') {
               privateTips.push(data.value);
             }
@@ -113,11 +119,11 @@ class Prognoz extends Transaction {
     await (new Promise((resolve) => {
       txsDB.createReadStream({})
         .on('data', (data) => {
-          if (data.value.type === txName) {
+          if (data.value.data.type === txName) {
             if (data.value.data.action === 'open') {
               for (let i = 0; i < privateTips.length; i += 1) {
                 if (privateTips[i].hash === data.value.data.href) {
-                  privateTips.split(i, 1);
+                  privateTips.splice(i, 1);
                   i -= 1;
                 }
               }
@@ -137,7 +143,7 @@ class Prognoz extends Transaction {
     return new Promise((resolve) => {
       txsDB.createReadStream({})
         .on('data', (data) => {
-          if (data.value.type === txName) {
+          if (data.value.data.type === txName) {
             if (data.value.from === address) {
               tips.push(data.value);
             }
@@ -165,7 +171,7 @@ class Prognoz extends Transaction {
     const result = await (new Promise((resolve) => {
       txsDB.createReadStream({})
         .on('data', (data) => {
-          if (data.value.type === txName) {
+          if (data.value.data.type === txName) {
             if (data.value.data.action === 'open') {
               if (data.value.data.href === hash) {
                 resolve(data.value.hash);
@@ -183,6 +189,7 @@ class Prognoz extends Transaction {
   static async genTX(from, publicKey, params) {
     const data = {};
     data.type = params.type;
+    data.action = params.action;
 
     switch (params.action) {
       case 'public':

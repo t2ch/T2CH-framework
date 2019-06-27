@@ -283,6 +283,9 @@ router.get('/balance/:address', async (req, res) => {
 });
 
 // TODO: refactor to race db search
+/*router.get('/prognoz/:params', async (req, res) => {
+  ;
+})*/
 
 router.get('/search/:key', async (req, res) => {
   let { key } = req.params;
