@@ -1,5 +1,4 @@
 import express from 'express';
-import { readFileSync } from 'fs';
 import DB from '../../node/db';
 import Block from '../../node/block';
 import Mempool from '../../node/mempool';
@@ -11,6 +10,11 @@ import {
   sendSignedTx,
   getPeers,
   getBalance,
+  getAllTipsByUser,
+  getAllPrivateTipsWithoutOpen,
+  getAllPublicTips,
+  getOpenByPrivate,
+  decryptTip,
 } from '../actions';
 
 const blockHashesDB = DB.getInstance('blocksHashes');
@@ -229,17 +233,46 @@ router.get('/mempool/:hash', (req, res) => {
   }
 });
 
+router.get('/prognoz/allpublic', async (req, res) => {
+  res.json(
+    await getAllPublicTips(),
+  );
+});
+
+router.get('/prognoz/user/:address', async (req, res) => {
+  res.json(
+    await getAllTipsByUser(req.params.address),
+  );
+});
+
+router.get('/prognoz/private/:time', async (req, res) => {
+  res.json(
+    await getAllPrivateTipsWithoutOpen(req.params.time),
+  );
+});
+
+router.get('/prognoz/open/:private', async (req, res) => {
+  res.json(
+    await getOpenByPrivate(req.params.private),
+  );
+});
+
+router.get('/prognoz/decrypt/:open', async (req, res) => {
+  try {
+    res.json(
+      await decryptTip(req.params.open),
+    );
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
 router.post('/sendtx', async (req, res) => {
   try {
     if (!req.body.data) {
       throw Error('Broken transaction :(');
     }
     let tx = req.body;
-    if (tx.data.voters === 'default') {
-      tx.data.voters = readFileSync('default-wallets', 'utf8')
-        .replace(/\n/g, ',')
-        .split(',');
-    }
 
     tx = parseTXObj(tx);
     await Mempool.addTransaction(tx);
@@ -281,11 +314,6 @@ router.get('/balance/:address', async (req, res) => {
     res.status(500).send(e);
   }
 });
-
-// TODO: refactor to race db search
-/*router.get('/prognoz/:params', async (req, res) => {
-  ;
-})*/
 
 router.get('/search/:key', async (req, res) => {
   let { key } = req.params;
