@@ -1,7 +1,11 @@
 {
   "name": "t2ch-framework",
-  "version": "0.4.12",
+  "version": "0.4.13",
   "description": "T2CH Blockchain Framework",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/t2ch/T2CH-framework"
+  },
   "main": "index.js",
   "scripts": {
     "API": "nodemon ./API/API.js",
