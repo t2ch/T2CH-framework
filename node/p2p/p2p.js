@@ -10,7 +10,7 @@ import peerStates from './peer-state';
 // Типы сообщений
 import Messages from './Messages';
 
-import { STUN as stunAddr } from '../../config'; // Сформированный JSON для всех типов сообщений передаваемых в сети
+import config from '../helper/config'; // Сформированный JSON для всех типов сообщений передаваемых в сети
 import Block from '../block';
 import Forging from '../forging';
 import Transaction from '../transaction';
@@ -57,7 +57,7 @@ class P2P {
     const serverIp = await v4();
 
     try {
-      stun.socket = await P2P.connectToSTUN(stunAddr, 6001);
+      stun.socket = await P2P.connectToSTUN(config.STUN, 6001);
       stun.state = 'connected';
     } catch (err) {
       stun.state = 'disconnected';

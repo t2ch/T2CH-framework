@@ -9,7 +9,7 @@ import Block from '../node/block';
 import Mempool from '../node/mempool';
 import Status from '../node/status';
 import PeerList from '../node/p2p/PeerList';
-import { initConnection } from '../config';
+import config from '../node/helper/config';
 import { txTypes } from '../node/helper/parseObj';
 import genRandomString from '../node/helper/hash';
 import Forging from '../node/forging';
@@ -60,7 +60,7 @@ export async function connectToAll() {
   });
 
   if (ips.length === 0) {
-    P2P.connectToHosts(initConnection);
+    P2P.connectToHosts(config.initConnection);
   }
   P2P.connectToHosts(ips);
 }
