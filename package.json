@@ -1,7 +1,7 @@
 {
-  "name": "evodesk_bc",
+  "name": "t2ch-framework",
   "version": "0.4.12",
-  "description": "Blockchain for evodesk platform",
+  "description": "T2CH Blockchain Framework",
   "main": "index.js",
   "scripts": {
     "API": "nodemon ./API/API.js",
@@ -50,9 +50,6 @@
     "ws": "^5.2.0"
   },
   "preferGlobal": true,
-  "bin": {
-    "cli": "./cli"
-  },
   "devDependencies": {
     "@babel/node": "^7.4.5",
     "@babel/preset-env": "^7.2.3",
