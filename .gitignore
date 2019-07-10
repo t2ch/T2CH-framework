@@ -7,7 +7,7 @@ privKeys
 /store
 /evocoinDB
 /dbAddress
-config.js
+clients/web_new/config.js
 config.json
 /keystore
 .vscode
