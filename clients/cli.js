@@ -1,5 +1,4 @@
 /* eslint-disable func-names */
-import { resolve } from 'path';
 import {
   startP2P,
   connectToAll,
@@ -320,7 +319,7 @@ function prognoz(vorpal) {
                   try {
                     await sendTX(params.type, params);
                   } catch (e) {
-                    console.log('Некорректная транзакция: '+e.message);
+                    console.log(`Некорректная транзакция: ${e.message}`);
                   }
                   resolves();
                 },
@@ -358,7 +357,7 @@ function prognoz(vorpal) {
                   try {
                     await sendTip(params.type, params);
                   } catch (e) {
-                    console.log('Некорректная транзакция: '+e.message);
+                    console.log(`Некорректная транзакция: ${e.message}`);
                   }
                   resolves();
                 },
@@ -390,7 +389,7 @@ function prognoz(vorpal) {
                   try {
                     await sendTX(params.type, params);
                   } catch (e) {
-                    console.log('Некорректная транзакция: '+e.message);
+                    console.log(`Некорректная транзакция: ${e.message}`);
                   }
                   resolves();
                 },
