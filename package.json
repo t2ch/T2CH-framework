@@ -1,7 +1,11 @@
 {
-  "name": "evodesk_bc",
-  "version": "0.4.12",
-  "description": "Blockchain for evodesk platform",
+  "name": "t2ch-framework",
+  "version": "0.4.14",
+  "description": "T2CH Blockchain Framework",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/t2ch/T2CH-framework"
+  },
   "main": "index.js",
   "scripts": {
     "API": "nodemon ./API/API.js",
@@ -11,13 +15,14 @@
     "debug": "babel-node --nolazy --inspect ./index.js",
     "prettier": "prettier --write ./\\*\\*/*.js"
   },
-  "author": "Evolution platform",
+  "author": "T2CH",
   "license": "ISC",
   "dependencies": {
     "@babel/core": "^7.2.2",
     "@babel/register": "^7.4.4",
     "@babel/runtime": "^7.2.0",
     "aes-js": "^3.1.1",
+    "aes256": "^1.0.4",
     "body-parser": "^1.18.3",
     "cache-base": "^4.0.0",
     "charwise": "^3.0.1",
@@ -49,15 +54,12 @@
     "ws": "^5.2.0"
   },
   "preferGlobal": true,
-  "bin": {
-    "cli": "./cli"
-  },
   "devDependencies": {
     "@babel/node": "^7.4.5",
     "@babel/preset-env": "^7.2.3",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.16.0",
-    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-airbnb-base": "^13.2.0",
     "eslint-plugin-babel": "^5.3.0",
     "eslint-plugin-import": "^2.17.3",
     "prettier": "^1.15.2"
