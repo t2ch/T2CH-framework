@@ -1,6 +1,6 @@
 {
   "name": "t2ch-framework",
-  "version": "0.4.16-tips",
+  "version": "0.4.17-tips",
   "description": "T2CH Blockchain Framework",
   "repository": {
     "type": "git",
@@ -35,9 +35,9 @@
     "fs": "0.0.1-security",
     "jayson": "^3.0.2",
     "keccakjs": "^0.2.1",
-    "level": "^4.0.0",
+    "level": "^5.0.0",
     "level-jobs": "^2.1.0",
-    "leveldown": "^4.0.1",
+    "leveldown": "^5.0.1",
     "lexicographic-integer-encoding": "^1.0.1",
     "merkle": "^0.6.0",
     "nodemon": "^1.18.3",
